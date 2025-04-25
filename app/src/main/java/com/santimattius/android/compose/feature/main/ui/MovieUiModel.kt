@@ -4,8 +4,19 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class MovieUiModel(
-    val id: Long,
-    val title: String,
-    val image: String,
+open class Content(
+    open val title: String,
+    open val id: String,
 ) : Parcelable
+
+@Parcelize
+data class MovieUiModel(
+    override val title: String,
+    override val id: String,
+) : Parcelable, Content(title, id)
+
+@Parcelize
+data class SerieUiModel(
+    override val title: String,
+    override val id: String,
+) : Parcelable, Content(title, id)

@@ -4,13 +4,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,6 +43,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.santimattius.android.compose.core.ui.component.AppBar
 import com.santimattius.android.compose.core.ui.component.DraggableGrid
+import com.santimattius.android.compose.core.ui.component.DraggableItem
+import com.santimattius.android.compose.core.ui.component.dragContainer
+import com.santimattius.android.compose.core.ui.component.rememberGridDragDropState
 import com.santimattius.android.compose.core.ui.theme.DragAndDropTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -105,11 +118,35 @@ fun MainContent(state: MainUiState, onMove: (Int, Int) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MoviesContent(data: List<MovieUiModel>, onMove: (Int, Int) -> Unit) {
-    DraggableGrid(items = data, onMove = onMove) { item, isDragging ->
-        val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp, label = "elevation")
-        CardGridItem(item = item, elevation = elevation)
+fun MoviesContent(data: List<List<Content>>, onMove: (Int, Int) -> Unit) {
+    val gridState = rememberLazyGridState()
+    val dragDropState = rememberGridDragDropState(gridState, {_, _ -> })
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier.dragContainer(dragDropState),
+        state = gridState,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        itemsIndexed(data[0], key = { _, item -> item }) { index, item ->
+            DraggableItem(dragDropState, index) { isDragging ->
+                CardGridItem(item = item, color = Color.Blue)
+            }
+        }
+
+        item(span = {  GridItemSpan(3) }) {
+            Spacer(modifier = Modifier.fillMaxWidth().height(20.dp))
+        }
+
+        itemsIndexed(data[1], key = { _, item -> item }) { index, item ->
+            DraggableItem(dragDropState, index) { isDragging ->
+                CardGridItem(item = item, color = Color.Red)
+            }
+        }
     }
 }
 
@@ -118,29 +155,14 @@ private const val IMAGE_ASPECT_RATIO = 0.67f
 @Composable
 fun CardGridItem(
     modifier: Modifier = Modifier,
-    item: MovieUiModel,
-    elevation: Dp,
+    color: Color,
+    item: Content,
 ) {
     Card(
-        modifier = modifier,
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = elevation)
+        modifier = modifier.height(100.dp).background(color = color),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
-        SubcomposeAsyncImage(
-            model = item.image,
-            loading = {
-                Box(contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(32.dp)
-                    )
-                }
-            },
-            contentDescription = item.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray)
-                .aspectRatio(ratio = IMAGE_ASPECT_RATIO),
-        )
+        Text(text = item.title)
     }
 }
 

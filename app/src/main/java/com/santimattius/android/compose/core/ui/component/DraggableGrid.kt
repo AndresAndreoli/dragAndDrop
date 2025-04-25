@@ -1,5 +1,6 @@
 package com.santimattius.android.compose.core.ui.component
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +45,7 @@ fun <T : Any> DraggableGrid(
     }
 }
 
+@SuppressLint("ModifierFactoryUnreferencedReceiver")
 fun Modifier.dragContainer(dragDropState: GridDragDropState): Modifier {
     return pointerInput(dragDropState) {
         detectDragGesturesAfterLongPress(

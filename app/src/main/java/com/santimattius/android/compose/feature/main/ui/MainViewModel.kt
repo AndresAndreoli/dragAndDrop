@@ -25,16 +25,39 @@ class MainViewModel(
     }
 
     private fun fetch() {
-        viewModelScope.launch(exceptionHandler) {
-            _state.update { it.copy(isLoading = true) }
-            val movies = repository.getMovies().map {
-                MovieUiModel(
-                    id = it.id,
-                    title = it.title,
-                    image = it.image
+        _state.update {
+            it.copy(
+                isLoading = false, data = listOf(
+                    listOf(
+                        MovieUiModel(
+                            title = "1",
+                            id = "1"
+                        ),
+                        MovieUiModel(
+                            title = "2",
+                            id = "2"
+                        ),
+                        MovieUiModel(
+                            title = "3",
+                            id = "3"
+                        ),
+                    ),
+                    listOf(
+                        SerieUiModel(
+                            title = "4",
+                            id = "4"
+                        ),
+                        SerieUiModel(
+                            title = "5",
+                            id = "5"
+                        ),
+                        SerieUiModel(
+                            title = "6",
+                            id = "6"
+                        ),
+                    ),
                 )
-            }
-            _state.update { it.copy(isLoading = false, data = movies) }
+            )
         }
     }
 
